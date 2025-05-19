@@ -1,0 +1,46 @@
+# Paso 1 
+- Crear Proyecto
+- npm create vite@latest name-of-your-project
+# Paso 2 
+- Instalar herramientas
+- npm i
+- Configuramos Boostrap
+npm install react-router-dom
+npm install localforage match-sorter sort-by
+npm install react-hook-form
+npm install @hookform/resolvers yup
+npm install react-bootstrap
+npm install react-icons --save
+npm install --save-dev @iconify-icon/react
+npm install @iconify-icon/react
+npm i axios
+npm install sweetalert2
+
+# Paso 3
+- Borrar App.css
+
+# Paso 4
+- Inicializar el proyecto 
+- npm run dev
+
+# Paso 5
+- Creamos las paginas 
+- Creamos los componenetes
+- Creamos los Hooks
+    - Creamos los hooks que queremos globalizar
+     - Creamos el useUser
+- Creamos la carpeta de navigation
+    - Creamos el PrivateRoute
+     - Creamos el PublicRoute
+- Creamos la carpeta context
+    - Creamos el UserContext
+
+# Paso 6
+- Creamos el estado que queremos globalizar
+- En el estado creado creamos las funciones que queremos que sean globalizadas
+- Configuramos el provider en el main
+- Crear Rutas en el main
+# Paso 7
+
+
+# Paso 8

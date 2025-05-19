@@ -1,0 +1,20 @@
+body{
+  background-color: #223343;
+  color: #fff;
+}
+
+
+.card{
+  background-color: #223343;
+  color: #fff;
+  border-color: #fff;
+
+}
+
+
+.card:hover{
+  background-color: #fff;
+  color: #223343;
+  border-color: #223343;
+  transform: scale(1.07);
+}
