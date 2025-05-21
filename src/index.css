@@ -18,3 +18,16 @@ body{
   border-color: #223343;
   transform: scale(1.07);
 }
+
+
+.spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 2000; /* ✅ más alto que el modal de Bootstrap (1050) */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
