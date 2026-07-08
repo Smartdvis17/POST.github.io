@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -9,10 +9,18 @@ import { PostPagination } from "../components/PostPagination";
 import { PostList } from "../components/PostList";
 import { CommentsModal } from "../components/CommentsModal";
 import { PostFormModal } from "../components/PostFormModal";
+import {
+  applyOverrides,
+  addLocalPost,
+  updateLocalPost,
+  removeLocalPost,
+  setEditedPost,
+  addDeletedId,
+  clearAllOverrides,
+} from "../utils/postOverrides";
 
 const API_URL = "https://jsonplaceholder.typicode.com/posts";
 const POSTS_PER_PAGE = 8;
-const POSTS_CACHE_KEY = "posts_cache";
 
 export const Post = () => {
   const navigation = useNavigate();
@@ -37,9 +45,6 @@ export const Post = () => {
   const [formBody, setFormBody] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Evita sobrescribir la copia local con [] antes de que termine de cargar.
-  const hasLoadedRef = useRef(false);
-
   const filteredPosts = posts.filter((post) => {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return true;
@@ -56,39 +61,42 @@ export const Post = () => {
   const postsToDisplay = paginationEnabled ? currentPosts : filteredPosts;
 
   useEffect(() => {
-    // Si ya tenemos una copia local (con nuestros cambios) la usamos en vez
-    // de volver a pedir los posts originales, para que sobrevivan al recargar.
-    const cached = localStorage.getItem(POSTS_CACHE_KEY);
-    if (cached) {
-      setPosts(JSON.parse(cached));
-      hasLoadedRef.current = true;
-    } else {
-      getPosts();
-    }
+    getPosts();
   }, []);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
-  // Cada vez que cambian los posts (crear, editar, eliminar) actualizamos la copia local.
-  useEffect(() => {
-    if (hasLoadedRef.current) {
-      localStorage.setItem(POSTS_CACHE_KEY, JSON.stringify(posts));
-    }
-  }, [posts]);
-
+  // Siempre trae los posts originales de la API y les aplica los cambios
+  // locales guardados (creados, editados, eliminados) encima.
   const getPosts = async () => {
     setLoading(true);
     try {
       const { data } = await axios.get(API_URL);
-      setPosts(data);
-      hasLoadedRef.current = true;
+      setPosts(applyOverrides(data));
     } catch (error) {
       console.log("error en getPosts", error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResetPosts = () => {
+    Swal.fire({
+      title: "¿Restablecer posts?",
+      text: "Se perderán los posts creados, editados o eliminados en esta sesión y se recargarán los originales de la API.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Restablecer",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      clearAllOverrides();
+      getPosts();
+    });
   };
 
   const getComentarios = async (post) => {
@@ -144,33 +152,29 @@ export const Post = () => {
         if (editingPost.isLocal) {
           // Post creado en esta sesión: la API de prueba no lo conoce (le
           // inventamos el id), así que un PUT real fallaría con error 500.
-          // Actualizamos solo el estado local.
-          setPosts((prev) =>
-            prev.map((post) =>
-              post.id === editingPost.id
-                ? { ...post, title: formTitle, body: formBody }
-                : post
-            )
-          );
+          updateLocalPost(editingPost.id, { title: formTitle, body: formBody });
         } else {
-          const { data } = await axios.put(`${API_URL}/${editingPost.id}`, {
+          // La API es falsa y no persiste nada; el PUT es solo demostrativo.
+          // Lo que sí persiste es la copia local del cambio.
+          await axios.put(`${API_URL}/${editingPost.id}`, {
             ...editingPost,
             title: formTitle,
             body: formBody,
           });
-          setPosts((prev) =>
-            prev.map((post) => (post.id === editingPost.id ? { ...post, ...data } : post))
-          );
+          setEditedPost(editingPost.id, { title: formTitle, body: formBody });
         }
+        setPosts((prev) =>
+          prev.map((post) =>
+            post.id === editingPost.id ? { ...post, title: formTitle, body: formBody } : post
+          )
+        );
       } else {
-        const { data } = await axios.post(API_URL, {
-          title: formTitle,
-          body: formBody,
-          userId: 1,
-        });
-        // La API de prueba siempre devuelve id 101; generamos uno propio para
-        // evitar choques y lo marcamos como local (ver nota de isLocal arriba).
-        setPosts((prev) => [{ ...data, id: Date.now(), isLocal: true }, ...prev]);
+        // La API es falsa y siempre devuelve id 101; generamos uno propio
+        // para evitar choques y lo marcamos como local.
+        await axios.post(API_URL, { title: formTitle, body: formBody, userId: 1 });
+        const newPost = { id: Date.now(), title: formTitle, body: formBody, userId: 1, isLocal: true };
+        addLocalPost(newPost);
+        setPosts((prev) => [newPost, ...prev]);
       }
 
       setShowFormModal(false);
@@ -207,8 +211,11 @@ export const Post = () => {
       if (!result.isConfirmed) return;
 
       try {
-        if (!post.isLocal) {
+        if (post.isLocal) {
+          removeLocalPost(post.id);
+        } else {
           await axios.delete(`${API_URL}/${post.id}`);
+          addDeletedId(post.id);
         }
         setPosts((prev) => prev.filter((p) => p.id !== post.id));
         Swal.fire({
@@ -302,6 +309,7 @@ export const Post = () => {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onCreate={openCreateModal}
+        onReset={handleResetPosts}
       />
 
       <PostPagination
@@ -315,6 +323,7 @@ export const Post = () => {
       <section className="container py-4">
         <PostList
           posts={postsToDisplay}
+          isSearching={Boolean(searchTerm.trim())}
           onViewComments={getComentarios}
           onEdit={openEditModal}
           onDelete={handleDelete}

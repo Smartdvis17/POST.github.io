@@ -1,12 +1,16 @@
 import { Icon } from "@iconify/react";
 import { PostCard } from "./PostCard";
 
-export const PostList = ({ posts, onViewComments, onEdit, onDelete }) => {
+export const PostList = ({ posts, isSearching, onViewComments, onEdit, onDelete }) => {
   if (posts.length === 0) {
     return (
       <div className="text-center text-muted py-5">
         <Icon icon="mdi:file-search-outline" className="fs-1 mb-2" />
-        <p className="mb-0">No se encontraron posts con esa búsqueda.</p>
+        <p className="mb-0">
+          {isSearching
+            ? "No se encontraron posts con esa búsqueda."
+            : "No hay posts para mostrar."}
+        </p>
       </div>
     );
   }
