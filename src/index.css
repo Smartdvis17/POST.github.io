@@ -1,24 +1,161 @@
-body{
-  background-color: #223343;
-  color: #fff;
+:root {
+  --brand-primary: #4f8cff;
+  --brand-primary-dark: #3a6fd9;
+  --bg-top: #16212e;
+  --bg-bottom: #0e161f;
+  --surface: #1e2d3d;
+  --surface-hover: #243a4e;
+  --text-light: #f5f7fa;
+  --text-muted: #a9b7c6;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  --bs-primary: var(--brand-primary);
+  --bs-primary-rgb: 79, 140, 255;
+  --bs-link-color: var(--brand-primary);
+  --bs-link-hover-color: var(--brand-primary-dark);
+  --bs-secondary-color: var(--text-muted);
 }
 
-
-.card{
-  background-color: #223343;
-  color: #fff;
-  border-color: #fff;
-
+body {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+  background-attachment: fixed;
+  color: var(--text-light);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
-
-.card:hover{
-  background-color: #fff;
-  color: #223343;
-  border-color: #223343;
-  transform: scale(1.07);
+/* ---------- Tarjetas (usadas en Post y como base del login) ---------- */
+.card {
+  background-color: var(--surface);
+  color: var(--text-light);
+  border-color: var(--border-subtle);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
 }
 
+.card:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-light);
+  border-color: var(--brand-primary);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Formularios ---------- */
+.form-control,
+.input-group-text {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-subtle);
+  color: var(--text-light);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.09);
+  border-color: var(--brand-primary);
+  color: var(--text-light);
+  box-shadow: 0 0 0 0.2rem rgba(79, 140, 255, 0.25);
+}
+
+.form-control.is-invalid {
+  border-color: #e0556f;
+}
+
+.form-check-input:checked {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+
+/* ---------- Página de autenticación (Login) ---------- */
+.auth-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  border-radius: 1rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.auth-icon-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(79, 140, 255, 0.15);
+  color: var(--brand-primary);
+}
+
+.auth-toggle-btn {
+  cursor: pointer;
+  border-left: none;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--brand-primary);
+  --bs-btn-border-color: var(--brand-primary);
+  --bs-btn-hover-bg: var(--brand-primary-dark);
+  --bs-btn-hover-border-color: var(--brand-primary-dark);
+  --bs-btn-active-bg: var(--brand-primary-dark);
+  --bs-btn-active-border-color: var(--brand-primary-dark);
+  --bs-btn-disabled-bg: var(--brand-primary);
+  --bs-btn-disabled-border-color: var(--brand-primary);
+}
+
+/* ---------- Modales (comentarios, crear/editar post) ---------- */
+.modal-content {
+  background-color: var(--surface);
+  color: var(--text-light);
+  border: 1px solid var(--border-subtle);
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--border-subtle);
+}
+
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* ---------- Comentarios ---------- */
+.comment-item {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.comment-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.avatar-circle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(79, 140, 255, 0.15);
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+
+/* ---------- Navbar de la app (Post) ---------- */
+.app-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgba(14, 22, 31, 0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border-subtle);
+}
 
 .spinner-overlay {
   position: fixed;
@@ -26,8 +163,9 @@ body{
   left: 0;
   height: 100vh;
   width: 100vw;
-  z-index: 2000; /* ✅ más alto que el modal de Bootstrap (1050) */
+  z-index: 2000; /* más alto que el modal de Bootstrap (1050) */
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgba(14, 22, 31, 0.4);
 }

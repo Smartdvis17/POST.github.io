@@ -19,7 +19,7 @@
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.56.4",
     "react-router-dom": "^7.6.0",
-    "sort-by": "^1.2.0",
+    "sort-by": "^0.0.2",
     "sweetalert2": "^11.21.2",
     "yup": "^1.6.1"
   },
